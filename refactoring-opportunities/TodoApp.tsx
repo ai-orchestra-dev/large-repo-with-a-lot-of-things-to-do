@@ -2,12 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Todo, FilterType } from './types';
 import { TodoItem } from './TodoItem';
 
+// Custom hook for managing input value
+const useInput = (initialValue: string = '') => {
+  const [value, setValue] = useState<string>(initialValue);
+  
+  const reset = () => setValue(initialValue);
+  
+  return {
+    value,
+    setValue,
+    reset
+  };
+};
+
 export const TodoApp: React.FC = () => {
   // State 1: Todo list
   const [todos, setTodos] = useState<Todo[]>([]);
   
   // State 2: Input value for new todos
-  const [inputValue, setInputValue] = useState<string>('');
+  const { value: inputValue, setValue: setInputValue, reset: resetInput } = useInput('');
   
   // State 3: Filter state
   const [filter, setFilter] = useState<FilterType>('all');
@@ -61,7 +74,7 @@ export const TodoApp: React.FC = () => {
         createdAt: new Date()
       };
       setTodos(prev => [...prev, newTodo]);
-      setInputValue('');
+      resetInput();
     }
   };
 
