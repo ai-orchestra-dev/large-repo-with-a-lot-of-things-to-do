@@ -2,6 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Todo, FilterType } from './types';
 import { TodoItem } from './TodoItem';
 
+// Custom hook for managing loading state
+const useLoading = (initialLoading: boolean = true) => {
+  const [isLoading, setIsLoading] = useState<boolean>(initialLoading);
+  
+  const finishLoading = () => setIsLoading(false);
+  const startLoading = () => setIsLoading(true);
+  
+  return {
+    isLoading,
+    finishLoading,
+    startLoading,
+    setIsLoading
+  };
+};
+
 export const TodoApp: React.FC = () => {
   // State 1: Todo list
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -13,7 +28,7 @@ export const TodoApp: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   
   // State 4: Loading state for demo purposes
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { isLoading, finishLoading } = useLoading(true);
 
   // useEffect 1: Load todos from localStorage on mount
   useEffect(() => {
@@ -29,7 +44,7 @@ export const TodoApp: React.FC = () => {
         console.error('Failed to parse saved todos:', error);
       }
     }
-    setIsLoading(false);
+    finishLoading();
   }, []);
 
   // useEffect 2: Save todos to localStorage whenever todos change
