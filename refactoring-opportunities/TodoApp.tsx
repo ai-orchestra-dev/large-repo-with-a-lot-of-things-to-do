@@ -2,6 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Todo, FilterType } from './types';
 import { TodoItem } from './TodoItem';
 
+// Custom hook for managing filter state with debugging
+const useFilter = (initialFilter: FilterType = 'all') => {
+  const [filter, setFilter] = useState<FilterType>(initialFilter);
+
+  // Log filter changes for debugging
+  useEffect(() => {
+    console.log(`Filter changed to: ${filter}`);
+  }, [filter]);
+
+  return {
+    filter,
+    setFilter
+  };
+};
+
 export const TodoApp: React.FC = () => {
   // State 1: Todo list
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -9,8 +24,8 @@ export const TodoApp: React.FC = () => {
   // State 2: Input value for new todos
   const [inputValue, setInputValue] = useState<string>('');
   
-  // State 3: Filter state
-  const [filter, setFilter] = useState<FilterType>('all');
+  // State 3: Filter state with debugging
+  const { filter, setFilter } = useFilter('all');
   
   // State 4: Loading state for demo purposes
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -47,10 +62,7 @@ export const TodoApp: React.FC = () => {
       : 'Todo App';
   }, [todos]);
 
-  // useEffect 4: Log filter changes for debugging
-  useEffect(() => {
-    console.log(`Filter changed to: ${filter}`);
-  }, [filter]);
+
 
   const addTodo = () => {
     if (inputValue.trim()) {
