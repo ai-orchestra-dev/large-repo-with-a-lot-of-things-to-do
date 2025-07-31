@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Todo, FilterType } from './types';
 import { TodoItem } from './TodoItem';
 
+// Custom hook for managing document title based on todo count
+const useDocumentTitle = (todos: Todo[]) => {
+  useEffect(() => {
+    const activeTodos = todos.filter(todo => !todo.completed);
+    document.title = activeTodos.length > 0 
+      ? `Todo App (${activeTodos.length} active)`
+      : 'Todo App';
+  }, [todos]);
+};
+
 export const TodoApp: React.FC = () => {
   // State 1: Todo list
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -39,13 +49,8 @@ export const TodoApp: React.FC = () => {
     }
   }, [todos, isLoading]);
 
-  // useEffect 3: Update document title with todo count
-  useEffect(() => {
-    const activeTodos = todos.filter(todo => !todo.completed);
-    document.title = activeTodos.length > 0 
-      ? `Todo App (${activeTodos.length} active)`
-      : 'Todo App';
-  }, [todos]);
+  // Update document title with todo count
+  useDocumentTitle(todos);
 
   // useEffect 4: Log filter changes for debugging
   useEffect(() => {
