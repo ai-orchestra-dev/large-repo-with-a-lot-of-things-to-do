@@ -1,36 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Todo } from './types';
 
-interface TodoItemProps {
-  todo: Todo;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-}
-
-export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) => {
-  // State 1: Edit mode
+// Custom hook for managing edit mode functionality
+const useEditMode = (initialValue: string, todoId: string) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  
-  // State 2: Edit value
-  const [editValue, setEditValue] = useState<string>(todo.text);
+  const [editValue, setEditValue] = useState<string>(initialValue);
 
-  // useEffect 1: Reset edit value when todo text changes
+  // Reset edit value when initial value changes
   useEffect(() => {
-    setEditValue(todo.text);
-  }, [todo.text]);
+    setEditValue(initialValue);
+  }, [initialValue]);
 
-  // useEffect 2: Focus management for editing
+  // Focus management for editing
   useEffect(() => {
     if (isEditing) {
-      const input = document.getElementById(`todo-edit-${todo.id}`) as HTMLInputElement;
+      const input = document.getElementById(`todo-edit-${todoId}`) as HTMLInputElement;
       if (input) {
         input.focus();
         input.select();
       }
     }
-  }, [isEditing, todo.id]);
+  }, [isEditing, todoId]);
 
-  const handleSaveEdit = () => {
+  const startEditing = () => setIsEditing(true);
+  
+  const saveEdit = () => {
     if (editValue.trim()) {
       // In a real app, we'd need a way to update the todo text
       // For this demo, we'll just exit edit mode
@@ -38,10 +32,37 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) 
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditValue(todo.text);
+  const cancelEdit = () => {
+    setEditValue(initialValue);
     setIsEditing(false);
   };
+
+  return {
+    isEditing,
+    editValue,
+    setEditValue,
+    startEditing,
+    saveEdit,
+    cancelEdit
+  };
+};
+
+interface TodoItemProps {
+  todo: Todo;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) => {
+  // Use custom hook for edit mode functionality
+  const {
+    isEditing,
+    editValue,
+    setEditValue,
+    startEditing,
+    saveEdit,
+    cancelEdit
+  } = useEditMode(todo.text, todo.id);
 
   return (
     <div 
@@ -69,8 +90,8 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) 
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyPress={(e) => {
-              if (e.key === 'Enter') handleSaveEdit();
-              if (e.key === 'Escape') handleCancelEdit();
+              if (e.key === 'Enter') saveEdit();
+              if (e.key === 'Escape') cancelEdit();
             }}
             style={{ 
               flex: 1, 
@@ -78,10 +99,10 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) 
               padding: '5px'
             }}
           />
-          <button onClick={handleSaveEdit} style={{ marginRight: '5px', padding: '5px' }}>
+          <button onClick={saveEdit} style={{ marginRight: '5px', padding: '5px' }}>
             Save
           </button>
-          <button onClick={handleCancelEdit} style={{ marginRight: '10px', padding: '5px' }}>
+          <button onClick={cancelEdit} style={{ marginRight: '10px', padding: '5px' }}>
             Cancel
           </button>
         </>
@@ -93,12 +114,12 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) 
               textDecoration: todo.completed ? 'line-through' : 'none',
               color: todo.completed ? '#6c757d' : 'black'
             }}
-            onDoubleClick={() => setIsEditing(true)}
+            onDoubleClick={startEditing}
           >
             {todo.text}
           </span>
           <button 
-            onClick={() => setIsEditing(true)}
+            onClick={startEditing}
             style={{ marginRight: '5px', padding: '5px' }}
           >
             Edit
